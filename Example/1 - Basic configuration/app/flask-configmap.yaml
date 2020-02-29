@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+   namespace: app
+   name: flask
+data:
+   app.py: |- 
+       import time
+
+       import redis
+       from redis.sentinel import Sentinel
+       from flask import Flask
+
+       import os
+
+       app = Flask(__name__)
+       cache = redis.Redis(
+           host='redis-app.app.svc.cluster.local', 
+           port=26379,
+           password=os.environ['REDIS_PASSWORD']
+       )
+       sentinel = Sentinel(
+           #host='redis-app-master.app.svc.cluster.local', #'redis-app.app.svc.cluster.local',
+           [('redis-app.app.svc.cluster.local',26379)],
+           sentinel_kwargs={'password': os.environ['REDIS_PASSWORD']},
+           #password=os.environ['REDIS_PASSWORD'],
+            #port= 26379 # 26379 #6379
+           socket_timeout=5
+       )
+       
+
+       #masters = sentinel.sentinel_masters()
+       master = sentinel.master_for(
+           'mymaster',
+           password=os.environ['REDIS_PASSWORD'],
+           socket_timeout=5
+       )
+
+       def get_hit_count():
+           sentinel = Sentinel(
+                    #host='redis-app-master.app.svc.cluster.local', #'redis-app.app.svc.cluster.local',
+               [('redis-app.app.svc.cluster.local',26379)],
+               sentinel_kwargs={'password': os.environ['REDIS_PASSWORD']},
+           #password=os.environ['REDIS_PASSWORD'],
+            #port= 26379 # 26379 #6379
+               socket_timeout=5
+           )
+
+
+       #masters = sentinel.sentinel_masters()
+           master = sentinel.master_for(
+               'mymaster',
+               password=os.environ['REDIS_PASSWORD'],
+               socket_timeout=5
+           ) 
+               #return master.incr('hits')
+            #return cache.sentinel_masters()
+           retries = 5
+           while True:
+               try:
+                   return master.incr('hits')
+               except redis.exceptions.ConnectionError as exc:
+                    if retries == 0:
+                        raise exc
+                    retries -= 1
+                    time.sleep(0.5)
+                    sentinel = Sentinel(
+                    #host='redis-app-master.app.svc.cluster.local', #'redis-app.app.svc.cluster.local',
+                        [('redis-app.app.svc.cluster.local',26379)],
+                        sentinel_kwargs={'password': os.environ['REDIS_PASSWORD']},
+           #password=os.environ['REDIS_PASSWORD'],
+            #port= 26379 # 26379 #6379
+                        socket_timeout=5
+                    )
+
+
+       #masters = sentinel.sentinel_masters()
+                    master = sentinel.master_for(
+                        'mymaster',
+                        password=os.environ['REDIS_PASSWORD'],
+                        socket_timeout=5
+                    )
+
+
+       @app.route('/')
+       def hello():
+           count = get_hit_count()
+           return 'Hello World! I have been seen {} times.\n'.format(count)

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: frontend
+   labels:
+       apps: frontend
+       # redis-app-client: true
+   namespace: app
+   #selector:
+   #    matchLabels:
+   #        run: app
+spec:
+   containers:
+       - image: jongablop/flask-frontend:arm64
+         name: flask-frontend
+         volumeMounts:
+         - mountPath: /code
+           name: vol
+         ports:
+         - containerPort: 5000
+         env:
+         - name: REDIS_PASSWORD
+           valueFrom:
+               secretKeyRef:
+                   name: redis-app
+                   key: redis-password
+   nodeSelector:
+       arch: arm
+   volumes:
+       - name: vol
+         configMap:
+             name: flask
+             items:
+                 - key: app.py
+                   path: app.py
+
