@@ -34,6 +34,8 @@ data:
            socket_timeout=5
        )
 
+       pod_name = os.environ['MY_POD_NAME']
+
        def get_hit_count():
            
            retries = 5
@@ -50,4 +52,4 @@ data:
        @app.route('/')
        def hello():
            count = get_hit_count()
-           return 'Hello World! I have been seen {} times.\n'.format(count)
+           return "Hello World! I'm running in pod {0} and I have been seen {1} times.\n".format(pod_name, count)
