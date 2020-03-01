@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rpi-jupyter
+  labels:
+    app: rpi-jupyter
+  namespace: jupyter-rpi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rpi-jupyter
+  template:
+    metadata:
+      labels:
+        app: rpi-jupyter
+    spec:
+      containers:
+      - name: rpi-jupyter
+        image: maxjiang/rpi-jupyter
+        ports:
+        - containerPort: 8888
