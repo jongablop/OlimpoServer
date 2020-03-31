@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+        name: redis-data-redis-app-slave-0
+spec:
+        capacity:
+                storage: 1Gi #8Gi
+        accessModes:
+                - ReadWriteOnce
+        hostPath:
+                path: /mnt/redis-app-slave-0
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+        name: redis-data-redis-app-slave-1
+spec:
+        capacity:
+                storage: 1Gi #8Gi
+        accessModes:
+                - ReadWriteOnce
+        hostPath:
+                path: /mnt/redis-app-slave-1
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+        name: redis-data-app-slave-2
+spec:
+        capacity: 
+                storage: 1Gi #8Gi
+        accessModes:
+                - ReadWriteOnce
+        hostPath:
+                path: /mnt/redis-app-slave-2
+

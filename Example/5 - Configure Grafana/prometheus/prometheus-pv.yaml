@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+        name: prom-2-prometheus-server-pv
+        labels:
+                app: prometheus
+                component: server
+                heritage: Helm
+                chart: prometheus-11.0.4
+                release: prom-2
+spec:
+        capacity:
+                storage: 2Gi #8Gi 
+        accessModes:
+                - ReadWriteOnce
+        hostPath:
+                path: /mnt/prometheus-server
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+        name: prom-2-prometheus-alertmanager-pv
+        labels:
+                app: prometheus
+                component: alertmanager
+                heritage: Helm
+                chart: prometheus-11.0.4
+                release: prom-2
+spec:
+        capacity:
+                storage: 2Gi #8Gi
+        accessModes:
+                - ReadWriteOnce
+        hostPath:
+                path: /mnt/prometheus-alertmanager
