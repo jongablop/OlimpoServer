@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+   namespace: app
+   name: flask-v2
+   labels:
+       version: v2
+data:
+   app.py: |- 
+       import time
+
+       import redis
+       from redis.sentinel import Sentinel
+       from flask import Flask
+
+       import os
+
+       app = Flask(__name__)
+
+       # This could be useful if we were not using sentinel
+       #cache = redis.Redis(
+       #    host='redis-app.app.svc.cluster.local', 
+       #    port=26379,
+       #    password=os.environ['REDIS_PASSWORD']
+       #)
+       print(os.environ['REDIS_PASSWORD'])
+       sentinel = Sentinel(
+       #[('redis-ha.app.svc.cluster.local',26379)],
+           [('redis-app.app.svc.cluster.local', 26379)],
+           sentinel_kwargs={'password': os.environ['REDIS_PASSWORD']},
+           socket_timeout=5
+       )
+       
+       master = sentinel.master_for(
+           'mymaster',
+           password=os.environ['REDIS_PASSWORD'],
+           socket_timeout=5
+       )
+
+       pod_name = os.environ['MY_POD_NAME']
+
+       def get_hit_count():
+           print(os.environ['REDIS_PASSWORD']) 
+           retries = 5
+           while True:
+               try:
+                       #return str(os.environ['REDIS_PASSWORD'])
+                    return master.incr('hits')
+               except redis.exceptions.ConnectionError as exc:
+                    if retries == 0:
+                        raise exc
+                    retries -= 1
+                    time.sleep(0.5)
+
+
+       @app.route('/')
+       def hello():
+           count = get_hit_count()
+           return "Hello World! I'm version 2.0, I'm running in pod {0} and I have been seen {1} times.\n".format(pod_name, count)

@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+        name: app-virtualservice-weight
+        namespace: app
+        labels:
+            kiali_wizard: weighted_routing 
+        managedFields:
+            - manager: Go-http-client
+              operation: Update
+              apiVersion: networking.istio.io/v1alpha3
+spec:
+        hosts:
+        - '*' #frontend-svc.app.svc.cluster.local
+        gateways:
+        - app/app-gateway
+        http: 
+        - route:
+          - destination:
+              host: frontend-svc.app.svc.cluster.local 
+              subset: v1
+            weight: 0
+          - destination:
+              host: frontend-svc.app.svc.cluster.local
+              subset: v2
+            weight: 100
