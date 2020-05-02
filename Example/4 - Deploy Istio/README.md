@@ -1,3 +1,3 @@
-# Step 1: Basic configuration
+# Step 4: Deploy Istio
 
-The aim of this step is to deploy a simple application. The backend will be based on Redis while the frontend will be a simple Flask app, which will update a hit counter stored in the database.
+The aim of this step is to configure the application so Istio can be deployed in the cluster.
